@@ -1,0 +1,4 @@
+# Python venvs
+.venv/
+# Scrapy cache
+.scrapy/

